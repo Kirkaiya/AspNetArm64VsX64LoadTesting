@@ -1,10 +1,16 @@
 // ASP.NET Core (on .NET 7) used for performance testing under load
 using EC2BenchmarkingAspnet7;
+using Microsoft.Extensions.Primitives;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
 var app = WebApplication.Create(args);
+var platform = new StringValues(string.Format(
+    "{0} on {1}",
+    Environment.Version.ToString(),
+    RuntimeInformation.ProcessArchitecture.ToString()));
 
 //create 100 weather forecasts and persist to in-memory EFCore db
 var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
@@ -24,7 +30,7 @@ using (var context = new WeatherContext())
 }
 
 
-app.MapGet("/weatherforecast", (int? count) =>
+app.MapGet("/weatherforecast", (int? count, HttpResponse response) =>
 {
     List<WeatherForecast> forecasts;
 
@@ -40,10 +46,11 @@ app.MapGet("/weatherforecast", (int? count) =>
         Parallel.ForEach(forecasts, x => x.EncryptedSummary = Encryptor.RSAEncrypt(ByteConverter.GetBytes(x.Summary), RSA.ExportParameters(false), false));
     }
 
+    response.Headers.Add("Platform", platform);
     return forecasts;
 });
 
-app.MapGet("/jsonserialize", async (int? count) =>
+app.MapGet("/jsonserialize", async (int? count, HttpResponse response) =>
 {
     List<WeatherForecast> forecasts;
     List<string> jsons = new(count ?? 100);
@@ -56,6 +63,7 @@ app.MapGet("/jsonserialize", async (int? count) =>
     await Task.Delay(3);
     Parallel.ForEach(forecasts, x => jsons.Add(JsonSerializer.Serialize(x)));
 
+    response.Headers.Add("Platform", platform);
     return jsons;
 });
 
