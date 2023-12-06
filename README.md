@@ -1,5 +1,3 @@
-# AspNetArm64VsX64LoadTesting
-A repo for me and Jignesh to collaborate on our performance tests for Graviton3 vs latest Intel x64 with ASP.NET Core.
+# AWS Graviton 3 performance vs x86-64 for .NET 8
 
-@JigneshSuthar - You can put the updated TechEmpower web app into a new folder inside src/ folder. I haven't tested the User Data scripts yet, but they should work (I will test soon).
-
+This repo contains the ASP.NET Core Web API (with encrypted-summary weather forecasts) and the TechEmpower Benchmark applications solution (of which we used /Mvc project) used to run tests on AWS EC2 instances running on x64 and arm64 processors. Please see our blog at <blog URL TBD>.
